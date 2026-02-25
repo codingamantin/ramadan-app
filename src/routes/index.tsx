@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { useRamadanCalendar } from '@/api/country'
+import { useRamadanCalendar } from '@/api/serverFunction'
 import { CountryCitySelector } from '@/components/CountryCitySelector'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import TableCalendar from '@/components/TableCalendar'
