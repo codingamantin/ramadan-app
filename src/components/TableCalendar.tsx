@@ -92,7 +92,7 @@ export default function TableCalendar({
 
               {!isLoading &&
                 !isError &&
-                data?.days.map((day) => {
+                data?.days.map((day, index) => {
                   const isTodayRow = day.gregorianDate === todayString
 
                   return (
@@ -103,7 +103,7 @@ export default function TableCalendar({
                         isTodayRow && 'bg-background  font-medium',
                       )}
                     >
-                      <TableCell>{day.hijriDay}</TableCell>
+                      <TableCell>{index + 1}</TableCell>
                       <TableCell>{day.gregorianDate}</TableCell>
                       <TableCell>{day.timings.Fajr}</TableCell>
                       <TableCell>{day.timings.Dhuhr}</TableCell>
