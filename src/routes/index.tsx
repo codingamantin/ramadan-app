@@ -31,7 +31,6 @@ function App() {
 
   const today = data?.days.find((d) => d.gregorianDate === todayString)
   const timings = today?.timings
-
   const hijriYear = data?.hijriYear
 
   return (
