@@ -54,7 +54,14 @@ export type RamadanInput = z.infer<typeof RamadanInputSchema>
 // SERVER FN HELPERS
 // --------------------
 
-const PRAYERS: PrayerName[] = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
+const PRAYERS: PrayerName[] = [
+  'Fajr',
+  'Sunrise',
+  'Dhuhr',
+  'Asr',
+  'Maghrib',
+  'Isha',
+]
 
 function normalizeTiming(value: unknown): string {
   if (typeof value !== 'string') return ''
@@ -68,12 +75,14 @@ async function fetchHijriMonthByCity(opts: {
   hijriMonth: number
   city: string
   country: string
+  method: string
+  tune: number[]
 }) {
-  const { hijriYear, hijriMonth, city, country } = opts
+  const { hijriYear, hijriMonth, city, country, method, tune } = opts
   const path = `/hijriCalendarByCity/${hijriYear}/${hijriMonth}`
 
   const res = await client.get(path, {
-    params: { city, country },
+    params: { city, country, method, tune: tune.join(',') },
     headers: { Accept: 'application/json' },
   })
 
@@ -97,6 +106,11 @@ export const getRamadanCalendarByCity = createServerFn({ method: 'GET' })
       throw new Error('HIJRI_YEAR env var is missing or invalid.')
     }
 
+    const isVienna = data.city.toLowerCase() === 'vienna'
+    const currentTune = isVienna
+      ? [0, 0, -7, 6, 5, 6, 0, -6, 0]
+      : [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
     const shiftDays = 1
 
     // 1) Ramadan (Hijri month 9)
@@ -106,6 +120,8 @@ export const getRamadanCalendarByCity = createServerFn({ method: 'GET' })
       hijriMonth: 9,
       city: data.city,
       country: data.country,
+      method: '2',
+      tune: currentTune,
     })
 
     if (ramadanRaw.length === 0) throw new Error('No Ramadan data returned.')
@@ -119,10 +135,14 @@ export const getRamadanCalendarByCity = createServerFn({ method: 'GET' })
       hijriMonth: 10,
       city: data.city,
       country: data.country,
+      method: '2',
+      tune: currentTune,
     })
 
     if (shawwalRaw.length < shiftDays) {
-      throw new Error('Not enough days in next Hijri month to append after shifting.')
+      throw new Error(
+        'Not enough days in next Hijri month to append after shifting.',
+      )
     }
 
     ramadanRaw = ramadanRaw.concat(shawwalRaw.slice(0, shiftDays))
@@ -149,7 +169,7 @@ export const getRamadanCalendarByCity = createServerFn({ method: 'GET' })
       location: {
         city: data.city,
         country: data.country,
-        timezone: data.timezone, 
+        timezone: data.timezone,
       },
       hijriYear,
       shiftDays,
@@ -171,7 +191,13 @@ export const fetchRamadanCalendar = (input: RamadanInput) => {
 
 export const fetchRamadanCalendarQueryOptions = (input?: RamadanInput) =>
   queryOptions({
-    queryKey: ['prayer-times', 'ramadan', input?.city, input?.country, input?.timezone ?? 'CET'],
+    queryKey: [
+      'prayer-times',
+      'ramadan',
+      input?.city,
+      input?.country,
+      input?.timezone ?? 'CET',
+    ],
     queryFn: () => fetchRamadanCalendar(input!),
     enabled: Boolean(input?.city && input.country),
     staleTime: 3_600_000, // 1 hour
@@ -183,6 +209,5 @@ export const fetchRamadanCalendarQueryOptions = (input?: RamadanInput) =>
 
 export const useRamadanCalendar = (input?: RamadanInput) => {
   return useQuery(fetchRamadanCalendarQueryOptions(input))
+  console.log('useRamadanCalendar called with input:', input)
 }
-
-
