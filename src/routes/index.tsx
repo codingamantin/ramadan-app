@@ -54,6 +54,7 @@ function App() {
         isLoading={isLoading}
         isError={isError}
       />
+      <p className='text-center text-sm'>Copyright &copy; 2026 - developed by Amantin</p>
     </div>
   )
 }
