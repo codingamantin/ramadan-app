@@ -2,24 +2,33 @@
 FROM node:20-slim AS builder
 WORKDIR /app
 
-# Enable pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Copy package files first to leverage Docker caching
+COPY package.json package-lock.json* ./
 
-COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install --frozen-lockfile
+# Install dependencies
+RUN npm ci
 
+# Copy the rest of the source code
 COPY . .
-# Run the build and list files to verify where the output went
-RUN pnpm run build && ls -la
+
+# Build the TanStack Start / Vinxi app
+RUN npm run build
 
 # Stage 2: Run
 FROM node:20-slim
 WORKDIR /app
 
-# Match the output folder from the 'ls -la' step above
-# Usually TanStack Start/Nitro is .output
+# Copy the build output from the builder stage
+# TanStack Start defaults to .output
 COPY --from=builder /app/.output ./.output
 
+# Optional: Copy package.json if your runtime needs it
+COPY --from=builder /app/package.json ./
+
 EXPOSE 3000
-# Ensure this path matches the entry point
+
+# Set environment to production
+ENV NODE_ENV=production
+
+# Start the server
 CMD ["node", ".output/server/index.mjs"]
