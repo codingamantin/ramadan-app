@@ -38,6 +38,11 @@ const DEFAULT_OPTIONS: CountryOption[] = [
     label: 'Austria',
     cities: [{ id: 'Vienna', label: 'Vienna' }],
   },
+  {
+    code: 'UK',
+    label: 'United Kingdom',
+    cities: [{ id: 'Brighton', label: 'Brighton' }],
+  },
 ]
 
 export type CountryCitySelectorProps = {
