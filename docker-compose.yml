@@ -6,4 +6,6 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      - API_URL=${API_URL}
+      - HIJRI_YEAR=${HIJRI_YEAR}
     restart: always
