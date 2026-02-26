@@ -1,25 +1,25 @@
-# Stage 1: Build
+# Build Stage
 FROM node:20-slim AS builder
 WORKDIR /app
-
 COPY package.json package-lock.json* ./
-RUN npm ci
-
+# Note: npm ci will fail if the 'npm:nitro-nightly' alias isn't in your lockfile
+RUN npm install 
 COPY . .
 RUN npm run build
 
-# Stage 2: Run
+# Production Stage
 FROM node:20-slim
 WORKDIR /app
 
-# Copy the dist folder instead of .output
-COPY --from=builder /app/dist ./dist
+# Copy the Nitro output
+COPY --from=builder /app/.output ./.output
 COPY --from=builder /app/package.json ./
 
-EXPOSE 3000
 ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=3000
 
-# Based on your output, we start the server from the dist folder
-# Note: If this fails, we may need to check if 'npm run start' 
-# or a specific entry point is needed.
-CMD ["node", "dist/server/index.js"]
+EXPOSE 3000
+
+# Nitro's standard entry point
+CMD ["node", ".output/server/index.mjs"]

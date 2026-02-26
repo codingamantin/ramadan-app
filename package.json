@@ -13,7 +13,8 @@
     "lint": "eslint",
     "format": "prettier --check .",
     "check": "prettier --write . && eslint --fix",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": "npm run build && wrangler deploy",
+     "start": "node .output/server/index.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",
@@ -34,7 +35,8 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwind-merge": "^3.5.0",
-    "tailwindcss": "^4.1.18"
+    "tailwindcss": "^4.1.18",
+    "nitro": "npm:nitro-nightly@latest"
   },
   "devDependencies": {
     "@tanstack/devtools-vite": "^0.3.11",
