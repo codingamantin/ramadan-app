@@ -30,14 +30,14 @@ export default function TableCalendar({
     <Card className="mt-8">
       <CardHeader>
         <CardTitle>
-          <p className="text-base ">Ramadan {hijriYear}</p>
+          <p className="text-base text-center ">Ramadan {hijriYear}</p>
         </CardTitle>
       </CardHeader>
 
       <CardContent>
         <div className="rounded-md border overflow-auto">
           <Table>
-            <TableHeader className="sticky top-0 bg-background z-10">
+            <TableHeader className="sticky top-0 bg-secondary-foreground z-10">
               <TableRow>
                 <TableHead>Hijri Day</TableHead>
                 <TableHead>Gregorian</TableHead>
@@ -100,7 +100,7 @@ export default function TableCalendar({
                       key={day.timestamp}
                       className={cn(
                         'transition-colors',
-                        isTodayRow && 'bg-background  font-medium',
+                        isTodayRow && 'bg-secondary-foreground/75  font-medium',
                       )}
                     >
                       <TableCell>{index + 1}</TableCell>
