@@ -7,8 +7,8 @@ import TableCalendar from '@/components/TableCalendar'
 import TodayCard from '@/components/TodayCard'
 
 const DEFAULT_LOCATION = {
-  city: 'Tetovo',
-  country: 'NMK',
+  city: 'Vienna',
+  country: 'AT',
 }
 
 export const Route = createFileRoute('/')({ component: App })
