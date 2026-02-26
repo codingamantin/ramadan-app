@@ -1,74 +1,25 @@
-# syntax=docker/dockerfile:1
-
-# ---- deps (all dependencies, incl. dev) ----
-FROM node:20-alpine AS deps
+# Stage 1: Build
+FROM node:20-slim AS builder
 WORKDIR /app
 
-# Enable package managers like pnpm/yarn if the repo uses them
-RUN corepack enable
+# Enable pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copy manifest + lockfiles first for better layer caching
-COPY package.json ./
-COPY package-lock.json* npm-shrinkwrap.json* ./
-COPY yarn.lock* ./
-COPY pnpm-lock.yaml* ./
+COPY package.json pnpm-lock.yaml* ./
+RUN pnpm install --frozen-lockfile
 
-# Install dependencies based on whichever lockfile exists
-RUN set -eux; \
-    if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; \
-    elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
-    elif [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then npm ci; \
-    else npm install; \
-    fi
-
-# ---- build (optional) ----
-FROM node:20-alpine AS build
-WORKDIR /app
-RUN corepack enable
-
-COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# Run the build and list files to verify where the output went
+RUN pnpm run build && ls -la
 
-# Run build only if a build script exists
-RUN set -eux; \
-    if node -e "const p=require('./package.json'); process.exit(p.scripts && p.scripts.build ? 0 : 1)"; then \
-        npm run build; \
-    else \
-        echo "No build script found; skipping build"; \
-    fi
-
-# ---- prod-deps (production-only dependencies) ----
-FROM node:20-alpine AS prod-deps
-WORKDIR /app
-RUN corepack enable
-
-COPY package.json ./
-COPY package-lock.json* npm-shrinkwrap.json* ./
-COPY yarn.lock* ./
-COPY pnpm-lock.yaml* ./
-
-RUN set -eux; \
-    if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile --prod; \
-    elif [ -f yarn.lock ]; then yarn install --frozen-lockfile --production=true; \
-    elif [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then npm ci --omit=dev; \
-    else npm install --omit=dev; \
-    fi
-
-# ---- runtime ----
-FROM node:20-alpine AS runner
+# Stage 2: Run
+FROM node:20-slim
 WORKDIR /app
 
-ENV NODE_ENV=production
-ENV PORT=3000
-
-# Copy production node_modules and app (including any build output)
-COPY --from=prod-deps /app/node_modules ./node_modules
-COPY --from=build /app ./
-
-# Use non-root user where possible
-USER node
+# Match the output folder from the 'ls -la' step above
+# Usually TanStack Start/Nitro is .output
+COPY --from=builder /app/.output ./.output
 
 EXPOSE 3000
-
-# Assumes your package.json defines a "start" script
-CMD ["npm", "run", "start"]
+# Ensure this path matches the entry point
+CMD ["node", ".output/server/index.mjs"]
