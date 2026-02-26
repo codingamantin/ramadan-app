@@ -1,6 +1,8 @@
+'use client'
 import { Moon } from 'lucide-react'
 import { Card, CardContent } from './ui/card'
 import { Skeleton } from './ui/skeleton'
+import { cn } from '@/lib/utils'
 
 type TodayCardProps = {
   today?: {
@@ -22,8 +24,35 @@ export default function TodayCard({
   isLoading,
   isError,
 }: TodayCardProps) {
+  const getLatestPassedPrayer = () => {
+    if (!timings) return null
+
+    const now = new Date()
+    const currentTime = now.getHours() * 60 + now.getMinutes()
+
+    let latestPrayer: string | null = null
+    let latestPrayerTime = -1
+
+    for (const prayer of order) {
+      const timeStr = timings[prayer]
+      if (!timeStr) continue
+
+      const [hour, minute] = timeStr.split(':').map(Number)
+      const prayerTime = hour * 60 + minute
+
+      if (prayerTime <= currentTime && prayerTime > latestPrayerTime) {
+        latestPrayer = prayer
+        latestPrayerTime = prayerTime
+      }
+    }
+
+    return latestPrayer
+  }
+
+  const latestPassedPrayer = getLatestPassedPrayer()
+
   return (
-    <Card className="mx-auto w-full max-w-3xl shadow-md relative overflow-hidden">
+    <Card className="mx-auto w-full  shadow-md relative overflow-hidden">
       <CardContent className="space-y-4  relative text-center">
         {isLoading && (
           <>
@@ -57,14 +86,18 @@ export default function TodayCard({
           <>
             {/* Title block (same vibe as your design) */}
             <div className="space-y-2">
-              <p className="text-sm font-semibold  uppercase tracking-widest">
+              <p className="text-sm font-semibold text-foreground uppercase tracking-widest">
                 Today
               </p>
-              <p className="text-2xl font-bold ">{today.readable}</p>
+              <p className="text-2xl text-foreground  font-bold ">
+                {today.readable}
+              </p>
               <Moon className="mx-auto  text-amber-400 " size={32} />
             </div>
 
-            <div className=" text-slate-400 ">Today&apos;s Prayer Timings</div>
+            <div className=" text-slate-400   ">
+              Today&apos;s Prayer Timings
+            </div>
 
             {/* Prayer tiles */}
             {timings && (
@@ -73,7 +106,12 @@ export default function TodayCard({
                   return (
                     <div
                       key={prayer}
-                      className="rounded-xl p-5 text-center space-y-3  border "
+                      className={cn(
+                        'rounded-xl text-foreground p-2 text-center space-y-2 bg-secondary-foreground border shadow-sm',
+                        latestPassedPrayer === prayer
+                          ? 'border-2 bg-linear-to-b  from-white to-amber-500/20  border-amber-300 shadow-lg shadow-amber-300/75 '
+                          : '',
+                      )}
                     >
                       <p className="text-xs font-semibold uppercase tracking-wider t">
                         {prayer}

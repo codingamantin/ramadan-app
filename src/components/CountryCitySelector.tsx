@@ -6,7 +6,7 @@ import {
   ComboboxItem,
   ComboboxList,
 } from '@/components/ui/combobox'
-import { Card } from './ui/card'
+import { Card, CardHeader } from './ui/card'
 
 export type LocationValue = {
   country: string
@@ -58,11 +58,13 @@ export function CountryCitySelector({
   const selectedCity = citiesForSelectedCountry.find((c) => c.id === value.city)
 
   return (
-    <Card className="p-8 rounded-md md:w-xl justify-center flex flex-col gap-4 md:items-end">
+    <Card className="p-5  rounded-md md:w-xl justify-center flex flex-col  md:items-end">
       {/* Country combobox */}
-      <div className="w-full flex flex-col gap-1">
+      <div className="w-full flex flex-col gap-2">
+        <CardHeader className="text-foreground text-lg px-0 font-bold">
+          Chose Location
+        </CardHeader>
         <label className="text-sm font-medium text-foreground ">Country</label>
-
         <Combobox<CountryOption>
           items={countries}
           itemToStringValue={(country) => country.label}
