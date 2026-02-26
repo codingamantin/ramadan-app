@@ -1,22 +1,18 @@
 import { defineConfig } from 'vite'
-import { devtools } from '@tanstack/devtools-vite'
-import tsconfigPaths from 'vite-tsconfig-paths'
-
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
-
+import { nitro } from 'nitro/vite' // This comes from the nightly package
 import viteReact from '@vitejs/plugin-react'
+import tsconfigPaths from 'vite-tsconfig-paths'
 import tailwindcss from '@tailwindcss/vite'
-import { cloudflare } from '@cloudflare/vite-plugin'
 
-const config = defineConfig({
+export default defineConfig({
   plugins: [
-    devtools(),
-    cloudflare({ viteEnvironment: { name: 'ssr' } }),
     tsconfigPaths({ projects: ['./tsconfig.json'] }),
     tailwindcss(),
-    tanstackStart(),
+    tanstackStart(), 
+    nitro({
+      preset: 'node-server' 
+    }),
     viteReact(),
   ],
 })
-
-export default config
