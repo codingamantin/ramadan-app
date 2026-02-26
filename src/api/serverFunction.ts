@@ -108,7 +108,7 @@ export const getRamadanCalendarByCity = createServerFn({ method: 'GET' })
 
     const isVienna = data.city.toLowerCase() === 'vienna'
     const currentTune = isVienna
-      ? [0, 0, -7, 6, 5, 6, 0, -6, 0]
+      ? [0, 2, -7, 6, 5, 6, 0, 6, 0]
       : [0, 0, 0, 0, 0, 0, 0, 0, 0]
 
     const shiftDays = 1
