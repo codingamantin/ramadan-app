@@ -209,5 +209,4 @@ export const fetchRamadanCalendarQueryOptions = (input?: RamadanInput) =>
 
 export const useRamadanCalendar = (input?: RamadanInput) => {
   return useQuery(fetchRamadanCalendarQueryOptions(input))
-  console.log('useRamadanCalendar called with input:', input)
 }
